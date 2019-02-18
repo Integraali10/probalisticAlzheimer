@@ -113,14 +113,15 @@
    (or (and  E (flip 0.29)) 
        (and B (flip  0.94)) 
        (flip 0.001)))
+ ;;вероятность сигнализации
  A
  ;; P(A and B| A or B)
  ))
 
-(hist(repeat 1000 sample ))
+;;(hist(repeat 1000 sample ))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
 
-;; см в записи
+;; conditional output
 (define (sample)
 (rejection-query
  (define E (flip 0.002))
@@ -129,9 +130,16 @@
    (or (and  E (flip 0.29)) 
        (and B (flip  0.94)) 
        (flip 0.001)))
- B
- (and A E)
+;; Вероятность кражи если сработала сигнализация и случилось землетрясение
+;;  B
+;;  (and A E)
+;;Вероятность землятрясения если сработала сигнализация
+ E
+ A
  ))
+
+;; (hist(repeat 1000 sample ))
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
 
 ;; (hist(repeat 1000 sample ))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
