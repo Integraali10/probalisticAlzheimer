@@ -141,6 +141,24 @@
 ;; (hist(repeat 1000 sample ))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
 
-;; (hist(repeat 1000 sample ))
-(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
-
+;;Парадокс о старшем ребенке (девочка мальчик) - отбрасываются семьи, где старший ребенок - девочка
+(define (paradox)
+(rejection-query
+ (define ElderBoy(flip 0.5))
+ (define Jungen(flip 0.5))
+ (define YoungBoy 
+   (if ElderBoy 
+       Jungen 
+       Jungen))
+  YoungBoy
+))
+;;Парадокс о ребенке (девочка мальчик) - берется произвольная семья
+(define(paradox)
+  (rejection-query
+ (define Boy(flip 0.5))
+ (define Jungen(flip 0.5))
+ (and Boy Jungen)
+ (or Boy Jungen)
+))
+(hist(repeat 1000 paradox))
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 paradox)))
