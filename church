@@ -119,3 +119,20 @@
 
 (hist(repeat 1000 sample ))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
+
+;; см в записи
+(define (sample)
+(rejection-query
+ (define E (flip 0.002))
+ (define B (flip 0.001))
+ (define A 
+   (or (and  E (flip 0.29)) 
+       (and B (flip  0.94)) 
+       (flip 0.001)))
+ B
+ (and A E)
+ ))
+
+;; (hist(repeat 1000 sample ))
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 sample)))
+
