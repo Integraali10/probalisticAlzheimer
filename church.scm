@@ -162,3 +162,25 @@
 ))
 (hist(repeat 1000 paradox))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 paradox)))
+
+
+;;; Not well
+ (define(MontyHall)
+  (rejection-query
+   (define prize (random-integer 3))
+   (define player (random-integer 3))
+   (define host (multinomial '(0 1 2) '(1 1 1))
+   (= player prize)
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))  
+
+
+;; ;; error paradox    
+ (define(MontyHall)
+  (rejection-query
+   (define prize (random-integer 3))
+   (define player (random-integer 3))
+   (define host (random-integer 3))
+   (= player prize)
+   (not (or (= host prize) (= host player)))
+   ))
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))  
