@@ -163,16 +163,37 @@
 (hist(repeat 1000 paradox))
 (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 paradox)))
 
+;;категориальное распределение
+(multinomial '(0 1 2) '(1 1 1))
 
-;;; Not well
+;; (define n (random-integer 3))
+;; (cond
+;;    [(= n 0) '(#t #f #f)]
+;;    [(= n 1) '(#f #t #f)]
+;;    [(= n 2) '(#f #f #t)]
+;;    ) 
+;; замена в списке элемента по индексу
+(define (list-with lst idx val)
+  (if (null? lst)
+    lst
+    (cons
+      (if (= idx 0)
+        val
+        (car lst))
+      (list-with (cdr lst) (- idx 1) val))))
+
  (define(MontyHall)
   (rejection-query
    (define prize (random-integer 3))
    (define player (random-integer 3))
-   (define host (multinomial '(0 1 2) '(1 1 1))
-   (= player prize)
-(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))  
-
+   (define probs (list-with (list-with '(1 1 1) prize 0) player 0))
+   (define host (multinomial '(0 1 2) probs))
+   (define probs2 (list-with (list-with '(1 1 1) host 0) player 0))
+   (define player2 (multinomial '(0 1 2) probs2))
+   (=  player2 prize)
+   (not (or (= host prize) (= host player)))
+    ))
+   (foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))  
 
 ;; ;; error paradox    
  (define(MontyHall)
@@ -183,4 +204,4 @@
    (= player prize)
    (not (or (= host prize) (= host player)))
    ))
-(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))  
+(foldl + 0 (map (lambda (x) (if x 1 0)) (repeat 1000 MontyHall)))   
