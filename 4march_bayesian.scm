@@ -114,7 +114,7 @@
   (flip (exp (* -100 (- x y) (- x y))))) (soft-eq? 1 1.1) 
 
 (define (predictpoly) 
-  (rejection-query 
+  ;(rejection-query 
   ;(mh-query 1000 10
    (define N (random-integer 5)) 
    (define ws(repeat N (lambda () (gaussian 0 1)))) 
@@ -122,5 +122,5 @@
    (all (map soft-eq? ys ys_))
    )
   )
-(hist (repeat 100 predictpoly))
-;(hist (predictpoly)) 
+;(hist (repeat 100 predictpoly))
+(hist (predictpoly)) 
