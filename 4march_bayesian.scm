@@ -99,3 +99,28 @@
 ;;(display res)
 
 (/ (sum (map (lambda(x) (if x 1 0)) res)) 1000)
+
+;;задача о предсказании полиномов
+(define xs '(0 1 2 3 4)) 
+(define x-next 5) 
+(define ys '(0.1 0.99 2.01 2.98 4.1)) 
+(define (poly x coeff) 
+  (if (null? coeff) 0 
+      (+ (car coeff) (* x (poly x (cdr coeff)))) )) ;(a0 * xA0 + al * xA1 + a2 * x^2 ...) 
+(define (polis xs coeff) 
+  (map (lambda (x) (poly x coeff)) xs)) 
+;(poly(x0 coeff) , poly(xl coeff) , poly(x2 coeff) ...) 
+(define (soft-eq? x y) 
+  (flip (exp (* -100 (- x y) (- x y))))) (soft-eq? 1 1.1) 
+
+(define (predictpoly) 
+  (rejection-query 
+  ;(mh-query 1000 10
+   (define N (random-integer 5)) 
+   (define ws(repeat N (lambda () (gaussian 0 1)))) 
+   (define ys_ (polis xs ws)) (poly x-next ws) 
+   (all (map soft-eq? ys ys_))
+   )
+  )
+(hist (repeat 100 predictpoly))
+;(hist (predictpoly)) 
