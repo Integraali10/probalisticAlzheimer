@@ -115,12 +115,27 @@
 
 (define (predictpoly) 
   ;(rejection-query 
-  ;(mh-query 1000 10
+  (mh-query 1000 10
    (define N (random-integer 5)) 
    (define ws(repeat N (lambda () (gaussian 0 1)))) 
-   (define ys_ (polis xs ws)) (poly x-next ws) 
+   (define ys_ (polis xs ws)) 
+   (poly x-next ws) 
    (all (map soft-eq? ys ys_))
    )
   )
 ;(hist (repeat 100 predictpoly))
 (hist (predictpoly)) 
+
+;не трогать тут реджекшон кваери этож пиздец
+(define (predictpoly) 
+  (rejection-query 
+  ;(mh-query 1000 10
+   (define N (random-integer 3)) 
+   (define ws(repeat N (lambda () (gaussian 0 1)))) 
+   (define ys_ (polis xs ws)) 
+   N
+   ;(poly x-next ws) 
+   (all (map soft-eq? ys ys_))
+   ))
+(hist (repeat 100 predictpoly))
+;(hist (predictpoly)) 
