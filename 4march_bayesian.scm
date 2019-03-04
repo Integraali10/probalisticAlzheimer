@@ -79,3 +79,23 @@
 ;;(display res)
 
 (/ (sum (map (lambda(x) (if x 1 0)) res)) 1000)
+
+(define n 18)
+(define m 2)
+(define N (+ n m))
+(define (sample)
+  ;(rejection-query
+  (mh-query 1000 10
+   (define fair (flip 0.99))
+   (define q (if fair 0.5 (uniform 0 1)))
+   (define probs (repeat N (lambda() (if (flip q) 1 0))))
+   (define n_ (sum probs))
+   fair
+   (= n n_)
+   ))
+;(hist (repeat 100 sample))
+;(define res (repeat 1000 sample))
+(define res (sample))
+;;(display res)
+
+(/ (sum (map (lambda(x) (if x 1 0)) res)) 1000)
