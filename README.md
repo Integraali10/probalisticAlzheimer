@@ -1,6 +1,6 @@
 # ProbalisticAlzheimer
 
-##To-do
+## To-do
 * trees_sequences_actual.rkt
     - [ ]  finish recursive sequences generation and prediction
 * trees_sequence_genetic_generation.rkt - Potapov's solution + mutation
