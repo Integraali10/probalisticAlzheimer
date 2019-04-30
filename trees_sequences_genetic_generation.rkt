@@ -143,9 +143,10 @@ lol
              [(flip 0.5) (list (car creature)
                                (muta-depth (+ 1 depth) (cadr creature))
                                (gen-expr))]
-             [else (list (car creature)
+             [(flip 0.5) (list (car creature)
                                (gen-expr)
-                               (muta-depth (+ 1 depth) (caddr creature)))])
+                               (muta-depth (+ 1 depth) (caddr creature)))]
+             [else creature])
            creature)
        creature)))
 
@@ -155,6 +156,77 @@ lol
 (optree-node-count lol)
 (mutation-tumors lol)
 ;;скрещивание (смотри в книжке описание)
-;;генерация малышей для соответсвтвия последовательности
+
+(define (crossbreeding cr1 cr2)
+  (cond
+    [(and (list? cr1)(list? cr2))
+      (cond
+        [(flip 0.45) (list (car cr1) (cadr cr1) (crossbreeding (cadr cr1) (caddr cr2)))]
+        [(flip 0.45) (list (car cr2) (crossbreeding (cadr cr1) (caddr cr2)) (caddr cr2))]
+        [(flip 0.5) (list (car cr1) (crossbreeding (cadr cr1) (caddr cr2)) (crossbreeding (caddr cr1) (cadr cr2)))]
+        [else (list (car cr2) (crossbreeding (cadr cr1) (caddr cr2)) (crossbreeding (caddr cr1) (cadr cr2)))])]
+    [(and (list? cr1)(not (list? cr2)))
+      (cond
+        [(flip 0.45) (list (car cr1) (cadr cr1) (crossbreeding (cadr cr1) cr2))]
+        [(flip 0.45) (list (car cr1) (crossbreeding (cadr cr1) cr2) cr2)]
+        [else (list (car cr1) (crossbreeding (cadr cr1) cr2) (crossbreeding (caddr cr1) cr2))])]
+    [(and (list? cr2) (not (list? cr1)))
+      (cond
+        [(flip 0.45) (list (car cr2) cr1 (crossbreeding cr1 (caddr cr2)))]
+        [(flip 0.45) (list (car cr2) (crossbreeding cr1 (caddr cr2)) (caddr cr2))]
+        [else (list (car cr2) (crossbreeding cr1 (cadr cr2)) (crossbreeding cr1 (caddr cr2)))])]
+    [else (if (flip 0.5) cr1 cr2)]))
+
+
+(crossbreeding '(* n 2) '(+ (* x1 x2) n))
+
+(define (crossmute cr1 cr2)
+  (let* ([jongen (crossbreeding cr1 cr2)])
+    (if (flip 0.1)
+        (mutation-tumors jongen)
+        jongen)
+    ))
+(crossmute '(* n 2) '(+ (* x1 x2) n))
 ;;фитнес-функция - СКО? Кто лучше всех, того и берем в родители?
+(define (rms numsT numsM)
+  (sqrt (/ (for/sum ([nM numsM][nT numsT]) (* (- nM nT) (- nM nT))) (length numsT))))
+
+(rms '(0 1 2 3 4 5) '(0 1 2 3 4 5))
+
+;;генерация малышей для соответсвтвия последовательности
+(define (justpopuli num)
+  (for/list ([i num]) (gen-expr)))
+(define jp (justpopuli 4))
+jp
+
+(reverse (gen-seq-next 'n '(1 0) 2 6))
+
+(define (sort-by-mse lst target)
+  (sort lst < #:key (lambda (e) (rms target (reverse (gen-seq-next e (list (second target) (first target)) 2 (length target)))))))
+
+(define loljp (sort-by-mse jp '(0 1 2 3 4 5)))
+loljp
+(for/list ([i loljp]) (rms '(0 1 2 3 4 5) (reverse (gen-seq-next i (list (second '(0 1 2 3 4 5)) (first '(0 1 2 3 4 5))) 2 (length '(0 1 2 3 4 5))))))
+
+; (define (genetic-n-seq guys target MSE)
+;   (if (<= MSE 0.00001)
+;       (first guys)
+;       (let* ([expr1 (first guys)]
+;              [expr2 (second guys)]
+;              [ys1 (gen-seq-next
+;                   expr1
+;                   (list (second target) (first target))
+;                   2 (length target))]
+;              [ys2 (gen-seq-next
+;                   expr2
+;                   (list (second target) (first target))
+;                   2 (length target))]
+;              [mse1 (rms target ys1)]
+;              [mse2 (rms target ys2)])
+;         (reject-n-seq
+;          (if (equal? (reverse ys) target)
+;              (cons expr results)
+;              results)
+;          target (- n-tries 1)))))
+
 
