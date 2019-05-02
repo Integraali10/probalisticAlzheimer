@@ -189,7 +189,7 @@ lol
 (crossmute '(* n 2) '(+ (* x1 x2) n))
 ;;фитнес-функция - СКО? Кто лучше всех, того и берем в родители?
 (define (rms numsT numsM)
-  (sqrt (/ (for/sum ([nM numsM][nT numsT]) (* (- nM nT) (- nM nT))) (length numsT))))
+  (/ (for/sum ([nM numsM][nT numsT]) (* (- nM nT) (- nM nT))) (length numsT)))
 
 (rms '(0 1 2 3 4 5) '(0 1 2 3 4 5))
 
