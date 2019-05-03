@@ -12,7 +12,7 @@
     - [x] Interpretation of the first kind of Expression
     - [x] Interpretation of the second kind of Expression with input for x
     - [x] Interpretation of the third kind of Expression with input for Two Variables (e.g. x1 and x2) and their iterator n
-* *Produsing sequences*
+* *Producing sequences*
     - [x] Using Math Expression with one Variable (e.g. x) to produce iterable sequences with length of input N
     - [ ] Using Math Expression with Two Variables to produce iterable recursive sequence with length of input N 
 * *Simple Rejection*
