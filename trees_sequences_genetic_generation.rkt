@@ -182,7 +182,7 @@ lol
 
 (define (crossmute cr1 cr2)
   (let* ([jongen (crossbreeding cr1 cr2)])
-    (if (flip 0.1)
+    (if (flip 0.2)
         (mutation-tumors jongen)
         jongen)
     ))
@@ -191,42 +191,102 @@ lol
 (define (rms numsT numsM)
   (/ (for/sum ([nM numsM][nT numsT]) (* (- nM nT) (- nM nT))) (length numsT)))
 
-(rms '(0 1 2 3 4 5) '(0 1 2 3 4 5))
-
 ;;генерация малышей для соответсвтвия последовательности
-(define (justpopuli num)
-  (for/list ([i num]) (gen-expr)))
-(define jp (justpopuli 4))
-jp
+;(define (ramped-half-and-half num)
+;  (for/list ([i num]) (gen-expr)))
 
-(reverse (gen-seq-next 'n '(1 0) 2 6))
+;jp
 
+(define (ramped-half-and-half)
+  (for*/vector ([quantity (range 0 50)])
+    (gen-expr)))
+
+
+;(reverse (gen-seq-next 'n '(1 0) 2 6))
+;сортировка по mse
 (define (sort-by-mse lst target)
   (sort lst < #:key (lambda (e) (rms target (reverse (gen-seq-next e (list (second target) (first target)) 2 (length target)))))))
 
-(define loljp (sort-by-mse jp '(0 1 2 3 4 5)))
-loljp
-(for/list ([i loljp]) (rms '(0 1 2 3 4 5) (reverse (gen-seq-next i (list (second '(0 1 2 3 4 5)) (first '(0 1 2 3 4 5))) 2 (length '(0 1 2 3 4 5))))))
+;(define loljp (sort-by-mse jp '(0 1 2 3 4 5)));
+;loljp
+;(for/list ([i loljp]) (rms '(0 1 2 3 4 5) (reverse (gen-seq-next i (list (second '(0 1 2 3 4 5)) (first '(0 1 2 3 4 5))) 2 (length '(0 1 2 3 4 5))))))
 
-; (define (genetic-n-seq guys target MSE)
-;   (if (<= MSE 0.00001)
-;       (first guys)
-;       (let* ([expr1 (first guys)]
-;              [expr2 (second guys)]
-;              [ys1 (gen-seq-next
-;                   expr1
-;                   (list (second target) (first target))
-;                   2 (length target))]
-;              [ys2 (gen-seq-next
-;                   expr2
-;                   (list (second target) (first target))
-;                   2 (length target))]
-;              [mse1 (rms target ys1)]
-;              [mse2 (rms target ys2)])
-;         (reject-n-seq
-;          (if (equal? (reverse ys) target)
-;              (cons expr results)
-;              results)
-;          target (- n-tries 1)))))
+(struct EvaluatedProgram
+  (tree fitness))
+;;our sequence to find
+(define target '(0 1 6 33 196 1335 10398))
+;(define target '(0 1 1 2 3 5 8 13))
+;(define target '(1 1 2 6 24 120 720))
+
+(define (evaluate-fitness tree)
+  (let* ([f (gen-seq-next tree (list (second target) (first target)) 2 (length target))]
+         [output (reverse f)]
+         [c (optree-node-count tree)])
+    (foldl (λ (x y acc) (+ acc
+                           (* (- x y) (- x y))))
+           0
+           output
+           target)))
+  
+(define (evaluate-programs vec)
+  (vector-map! (λ (tree) (EvaluatedProgram tree (* (+ 1 (optree-node-count tree)) (evaluate-fitness tree))))
+               vec))
 
 
+(define (n-most-fit n vec)
+  (let* ([ls (vector->list vec)]
+         [sorted (sort ls (λ (p1 p2) (< (EvaluatedProgram-fitness p1)
+                                        (EvaluatedProgram-fitness p2))))])
+    (take sorted n)))
+
+(define (distinct-randoms bound)
+  (let ([x (random bound)]
+        [y (random bound)])
+    (if (= x y)
+        (distinct-randoms bound)
+        (values x y))))
+
+(define (tournament-round prog1 prog2)
+  (crossmute (EvaluatedProgram-tree prog1)
+                                (EvaluatedProgram-tree prog2)))
+
+
+(define (next-generation vec)
+  (define foo (make-vector 200))
+  (define champions (n-most-fit 40 vec))
+  (for ([i (range 0 140)])
+    (let-values ([(n1 n2) (distinct-randoms (vector-length vec))])
+      (let ([tree (tournament-round (vector-ref vec n1) (vector-ref vec n2))])
+        (vector-set! foo i tree))))
+  (for ([i (range 160 200)])
+    (vector-set! foo i (EvaluatedProgram-tree (list-ref champions (- i 160)))))
+  (for ([i (range 120 160)])
+    (vector-set! foo i (mutation-nodes (EvaluatedProgram-tree (vector-ref vec (random (vector-length vec)))))))
+  foo)
+
+
+(define run-gp
+  (λ (#:max-generations [max-generations 700])
+    (define (run population generation)
+      (evaluate-programs population)
+      (let* ([leaders (n-most-fit 10 population)]
+             [peak-fitness (EvaluatedProgram-fitness (car leaders))]
+             [best-program (EvaluatedProgram-tree (car leaders))])
+        (displayln (string-append "Generation " (number->string generation)))
+        (cond
+          [(= peak-fitness 0) (displayln "Solution found!")
+                              (displayln best-program)]
+          [else (display "Top fitness scores: ")
+                (displayln (map EvaluatedProgram-fitness leaders))
+                (display "\n")
+                (cond
+                  [(= generation max-generations)
+                   (displayln (string-append "No solution found in "
+                                             (number->string max-generations)
+                                             " generations."))
+                   (display "Most fit solution: ")
+                   (displayln best-program)]
+                  [else (run (next-generation population) (+ generation 1))])])))
+    (run (ramped-half-and-half) 1)))
+
+(run-gp)
